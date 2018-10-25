@@ -1,0 +1,8 @@
+prefix=/home/natalia/ros_baxter/devel
+
+Name: baxter_face
+Description: Description of baxter_face
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/natalia/ros_baxter/devel/lib 
+Requires: 

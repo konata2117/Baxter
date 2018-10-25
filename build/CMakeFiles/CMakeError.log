@@ -1,0 +1,53 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/natalia/ros_baxter/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec747764705/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec747764705.dir/build.make CMakeFiles/cmTryCompileExec747764705.dir/build
+make[1]: se ingresa al directorio «/home/natalia/ros_baxter/build/CMakeFiles/CMakeTmp»
+/usr/bin/cmake -E cmake_progress_report /home/natalia/ros_baxter/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec747764705.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec747764705.dir/CheckSymbolExists.c.o   -c /home/natalia/ros_baxter/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTryCompileExec747764705
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec747764705.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec747764705.dir/CheckSymbolExists.c.o  -o cmTryCompileExec747764705 -rdynamic 
+CMakeFiles/cmTryCompileExec747764705.dir/CheckSymbolExists.c.o: En la función `main':
+CheckSymbolExists.c:(.text+0x16): referencia a `pthread_create' sin definir
+collect2: error: ld returned 1 exit status
+make[1]: *** [cmTryCompileExec747764705] Error 1
+make[1]: se sale del directorio «/home/natalia/ros_baxter/build/CMakeFiles/CMakeTmp»
+make: *** [cmTryCompileExec747764705/fast] Error 2
+
+File /home/natalia/ros_baxter/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/natalia/ros_baxter/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec3997254007/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3997254007.dir/build.make CMakeFiles/cmTryCompileExec3997254007.dir/build
+make[1]: se ingresa al directorio «/home/natalia/ros_baxter/build/CMakeFiles/CMakeTmp»
+/usr/bin/cmake -E cmake_progress_report /home/natalia/ros_baxter/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3997254007.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec3997254007.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-2.8/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec3997254007
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3997254007.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTryCompileExec3997254007.dir/CheckFunctionExists.c.o  -o cmTryCompileExec3997254007 -rdynamic -lpthreads 
+/usr/bin/ld: no se puede encontrar -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [cmTryCompileExec3997254007] Error 1
+make[1]: se sale del directorio «/home/natalia/ros_baxter/build/CMakeFiles/CMakeTmp»
+make: *** [cmTryCompileExec3997254007/fast] Error 2
+
+

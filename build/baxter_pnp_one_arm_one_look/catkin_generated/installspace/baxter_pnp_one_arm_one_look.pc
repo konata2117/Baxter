@@ -1,0 +1,8 @@
+prefix=/home/natalia/ros_baxter/install
+
+Name: baxter_pnp_one_arm_one_look
+Description: Description of baxter_pnp_one_arm_one_look
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/natalia/ros_baxter/install/lib -lbaxter_pnp_one_arm_one_look
+Requires: OpenCv roscpp sensor_msg/Image
