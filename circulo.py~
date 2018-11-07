@@ -63,7 +63,7 @@ while not rospy.is_shutdown():
 	# print img_size
 	
 	# detect circles in the image
-	circles = cv2.HoughCircles(gray, cv.CV_HOUGH_GRADIENT, 1, 200, param1=40, param2=45, minRadius=10, maxRadius=130)
+	circles = cv2.HoughCircles(gray, cv.CV_HOUGH_GRADIENT, 1, 200, param1=40, param2=45, minRadius=20, maxRadius=140)
 	#print circles
 	
 	# ensure at least some circles were found

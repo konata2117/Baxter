@@ -27,7 +27,7 @@ def callback(msg):
 	global foto
 	foto = cv_bridge.CvBridge().imgmsg_to_cv2(msg)
 
-rospy.Subscriber('/cameras/right_hand_camera/image', Image, callback)
+rospy.Subscriber('/cameras/left_hand_camera/image', Image, callback)
 
 while not rospy.is_shutdown():
 	# Capture frame-by-frame
@@ -41,29 +41,34 @@ while not rospy.is_shutdown():
 	# load the image, clone it for output, and then convert it to grayscale
 			
 	#cv.CvtColor(cv.fromarray(foto),gray1, cv.CV_BGR2GRAY)
-	
+	#kernel = np.ones((6,6),np.uint8)
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	dimensiones =gray.shape
-	# apply GuassianBlur to reduce noise. medianBlur is also added for smoothening, reducing noise.
+        RGB=cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        cv2.imshow("RGB",RGB)
+        # apply GuassianBlur to reduce noise. medianBlur is also added for smoothening, reducing noise.
+        kernel = np.ones((3,3),np.uint8)
 	gray = cv2.GaussianBlur(gray,(5,5),0);
 	gray = cv2.medianBlur(gray,5)
-	
+        gray = cv2.erode(gray,kernel,iterations = 1)
+	#gray = cv2.morphologyEx(gray,cv2.MORPH_CLOSE,kernel)
 	# Adaptive Guassian Threshold is to detect sharp edges in the Image. For more information Google it.
 	gray = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,3.5)
 	
-	kernel = np.ones((2.6,2.7),np.uint8)
-	gray = cv2.erode(gray,kernel,iterations = 1)
-	# gray = erosion
 	
+	#gray = cv2.erode(gray,kernel,iterations = 1)
+	# gray = erosion
+	#Se aplica la transformacion: Closing
+        
 	#gray = cv2.dilate(gray,kernel,iterations = 1)
 	# gray = dilation
 
 	# get the size of the final image
 	# img_size = gray.shape
-	# print img_size
+	# print img_size	
 	
 	# detect circles in the image
-	circles = cv2.HoughCircles(gray, cv.CV_HOUGH_GRADIENT, 1, 50, param1=40, param2=45, minRadius=20, maxRadius=140)
+	circles = cv2.HoughCircles(gray, cv.CV_HOUGH_GRADIENT, 1, 200, param1=40, param2=45, minRadius=20, maxRadius=140)
 	#print circles
 	
 	# ensure at least some circles were found
@@ -78,15 +83,15 @@ while not rospy.is_shutdown():
 			cv2.circle(frame, (x, y), r, (0, 255, 0), 4)
 			cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1)
 			#time.sleep(0.5)
-			print "Column Number: "
-			print x
-			print "Row Number: "
-			print y
+			#print "Column Number: "
+			#print x
+			#print "Row Number: "
+			#print y
 			print "Radius is: "
 			print r
 
 	# Display the resulting frame
-		cv2.imshow('gray',gray)
+        cv2.imshow('gray',gray)
     	cv2.imshow('frame',frame)
  	if cv2.waitKey(1) & 0xFF == ord('q'):
 		break
