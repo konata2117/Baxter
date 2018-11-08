@@ -196,9 +196,9 @@ class mover():
 def main():
 	rospy.init_node('movimiento', anonymous = True) #anonimo para que no tenga alcance de nombres
 
-	mov = mover('right')
+	mov = mover('left')
 
-	mov.mover_baxter('base',[0.69, -0.48, -0.03],[-3.09,-0.095,-3.08])
+	mov.mover_baxter('base',[0.69, 0.48, -0.03],[-3.09,-0.095,-3.08])
 	mov.mover_baxter('base',[0.69, 0.18, -0.03],[-3.09,-0.095,-3.08])
 
 if __name__ == "__main__":
