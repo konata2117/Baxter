@@ -14,6 +14,7 @@ from baxter_core_msgs.srv import SolvePositionIK, SolvePositionIKRequest
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import JointState
 import tf
+
 rospy.init_node('camarita2',anonymous=True)
 
 cap = baxter_interface.CameraController('right_hand_camera') 
@@ -24,8 +25,8 @@ cap.resolution = cap.MODES[0]
 foto = None
 # Pose inicial
 xx = 0.6
-yy = 0.3
-zz = 0.1 
+yy = -0.3
+zz = -0.1 
 roll = math.pi	#Rotacion x
 pitch = 0.0	#Rotacion y	
 yaw = 0.0		#Rotacion z
@@ -105,33 +106,37 @@ def mover_baxter(source_frame, trans, rot):
 		print "Movimiento no ejecutado"
 	print respuesta.joints[0].position
 	print respuesta.joints[0].name
+
+
 rospy.Subscriber('/cameras/right_hand_camera/image', Image, callback)
 
 while not rospy.is_shutdown():
+	#rospy.Subscriber('/cameras/left_hand_camera/image', Image, callback)
 	# Capture frame-by-frame
 	while np.all(foto) == None:
 		print "Ahorita no joven"
-		continue 
-    
+           
+		continue
+    	#cap.close()
 	#ret, frame = cap.read()
- 
+ 	#rate.sleep()
 	frame= foto
+	cv2.imwrite("foto.jpg",foto)
+	#img_th1 = Image.fromarray(frame)
+	#img_th1.save()
+	print type(frame)
 	# load the image, clone it for output, and then convert it to grayscale
 			
 
-	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #tranformacion de la imagen a escla de grises
 	dimensiones =gray.shape
-	RGB=cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-	cv2.imshow("RGB",RGB)   
 	kernel = np.ones((3,3),np.uint8)
-	gray = cv2.GaussianBlur(gray,(5,5),0);
-	gray = cv2.medianBlur(gray,5)
-	gray = cv2.erode(gray,kernel,iterations = 1)
+	gray = cv2.GaussianBlur(gray,(5,5),0)#para eliminar el ruido de la imagen
+	gray = cv2.medianBlur(gray,5) #reduce el ruido de sal
+	gray = cv2.erode(gray,kernel,iterations = 1)#erosiona la imagen
 	gray = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,3.5)
 	
-	
-		
-	
+
 	#detectar circulos en la imagen
 	circles = cv2.HoughCircles(gray, cv.CV_HOUGH_GRADIENT, 1, 200, param1=40, param2=45, minRadius=20, maxRadius=140)
 	
@@ -139,21 +144,24 @@ while not rospy.is_shutdown():
 	# preguntar si los circulos fueron encontrados
 	if circles is not None:
 		# convert the (x, y) coordinates and radius of the circles to integers
-		print "circles" , circles
+                print "circles" , circles
 		circles = np.round(circles[0, :]).astype("int")
 		print circles[0][0]
 		print circles[0][1]
 		# loop over the (x, y) coordinates and radius of the circles
 		for (x, y, r) in circles:
-			print x , y , r
+                        print x , y , r
 			# draw the circle in the output image, then draw a rectangle in the image
 			# corresponding to the center of the circle
-			cv2.circle(frame, (x, y), r, (0, 255, 0), 4)
-			cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1)
-			cv2.imshow('gray',gray)
-			xx=pixel_to_baxter((circles[0][0],circles[0][1]),0.32)
-			print xx[0], xx[1]
-			mover_baxter('base',[xx[0], xx[1], -0.03],[-3.09,-0.095,-3.08])
+			cv2.circle(frame, (x, y), r, (0, 255, 0), 4) #dibujar circulo periferico
+			cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1) #dibujar rectangulo en el centro
+			cv2.imshow('gray',gray) #mostrar imagen
+			xx=pixel_to_baxter((circles[0][0],circles[0][1]),0.32) #convertir pixel a punto de baxter
+			print xx[0], xx[1] #imprimir ese punto 
+			#rate=rospy.Rate(100)			
+			mover_baxter('base',[xx[0], xx[1], -0.03],[-3.09,-0.095,-3.08]) #mover a punto obtenido, desde la transformacion de pixel                
+			#rate.sleep()
+			print "Moviendo al punto (xx[0], xx[1])",xx[0],xx[1]
 			#yy=pixel_to_baxter(y,0,3)
 			#print "Coordenada es: ", xx
 			#print "Column Number: "
@@ -165,81 +173,13 @@ while not rospy.is_shutdown():
 
 	# Display the resulting frame
         
-    	cv2.imshow('frame',frame)
-
- 	if cv2.waitKey(1) & 0xFF == ord('q'):
+		cv2.imshow('frame',frame)
+	else:
+		print "No hay Circulos"
+		break
+	if cv2.waitKey(1) & 0xFF == ord('q'):
 		break
 
 # When everything done, release the capture
 
 cv2.destroyAllWindows()
-#while not rospy.is_shutdown():
-	#rospy.Subscriber('/cameras/left_hand_camera/image', Image, callback)
-	# Capture frame-by-frame
-#while np.all(foto) == None:
-#	print "Ahorita no joven"
-#	continue
-    	#cap.close()
-	#ret, frame = cap.read()
- 	#rate.sleep()
-#frame= foto
-#cv2.imshow("frame",frame)
-#	cv2.imwrite("foto.jpg",foto)
-	#img_th1 = Image.fromarray(frame)
-	#img_th1.save()
-#	print type(frame)
-	# load the image, clone it for output, and then convert it to grayscale
-			
-
-#	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #tranformacion de la imagen a escla de grises
-#	dimensiones =gray.shape
-#	kernel = np.ones((3,3),np.uint8)
-#	gray = cv2.GaussianBlur(gray,(5,5),0)#para eliminar el ruido de la imagen
-#	gray = cv2.medianBlur(gray,5) #reduce el ruido de sal
-#	gray = cv2.erode(gray,kernel,iterations = 1)#erosiona la imagen
-#	gray = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,3.5)
-	
-
-	#detectar circulos en la imagen
-#	circles = cv2.HoughCircles(gray, cv.CV_HOUGH_GRADIENT, 1, 200, param1=40, param2=45, minRadius=20, maxRadius=140)
-	
-	
-	# preguntar si los circulos fueron encontrados
-
-#		print circles[0][0]
-#		print circles[0][1]
-		# loop over the (x, y) coordinates and radius of the circles
-#		for (x, y, r) in circles:
-#                       print x , y , r
-			# draw the circle in the output image, then draw a rectangle in the image
-			# corresponding to the center of the circle
-#			cv2.circle(frame, (x, y), r, (0, 255, 0), 4) #dibujar circulo periferico
-#			cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1) #dibujar rectangulo en el centro
-#			cv2.imshow('gray',gray) #mostrar imagen
-#			xx=pixel_to_baxter((circles[0][0],circles[0][1]),0.32) #convertir pixel a punto de baxter
-#			print xx[0], xx[1] #imprimir ese punto 
-			#rate=rospy.Rate(100)			
-#			mover_baxter('base',[xx[0], xx[1], -0.03],[-3.09,-0.095,-3.08]) #mover a punto obtenido, desde la transformacion de pixel                
-			#rate.sleep()
-#			print "Moviendo al punto (xx[0], xx[1])",xx[0],xx[1]
-			#yy=pixel_to_baxter(y,0,3)
-			#print "Coordenada es: ", xx
-			#print "Column Number: "
-			#print x
-			#print "Row Number: "
-			#print y
-#			print "Radius is: "
-#			print r
-
-	# Display the resulting frame
-        
-#		cv2.imshow('frame',frame)
-#	else:
-#		print "No hay Circulos"
-#		break
-#	if cv2.waitKey(1) & 0xFF == ord('q'):
-#		break
-
-# When everything done, release the capture
-
-#cv2.destroyAllWindows()
