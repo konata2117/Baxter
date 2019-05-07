@@ -16,9 +16,9 @@ from baxter_core_msgs.srv import SolvePositionIK, SolvePositionIKRequest
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import JointState
 import tf
-
+import random
 rospy.init_node('camarita2',anonymous=True)
-cap = baxter_interface.CameraController('left_hand_camera') 
+cap = baxter_interface.CameraController('right_hand_camera') 
 cap.open()
 cap.resolution = cap.MODES[0]
 foto = None
@@ -28,27 +28,27 @@ def QtoE(): #Quaternion to Euler. Converts Quaternion angles(x, y, z, w) into Eu
 		print (limb_interface.endpoint_pose())
 		print ("Arm Euler angles: ", euler)
 # Pose inicial 47 x27 cm
-xx = 0.5
-yy = 0.6
-zz = 0.0
+xx = 0.73
+yy = -0.42
+zz = 0.01
 roll = math.pi	#Rotacion x
 pitch = 0.0	#Rotacion y	
 yaw = 0.0		#Rotacion z
 
 pose_i = [xx, yy, zz,roll,pitch, yaw]
 pose = [xx,yy,zz,roll, pitch, yaw]
-gripper = baxter_interface.Gripper("left")
-limb_interface = baxter_interface.Limb('left')
+gripper = baxter_interface.Gripper("right")
+limb_interface = baxter_interface.Limb('right')
 # calibrate the gripper
 gripper.calibrate()
 
 # Parametros de camara
-cam_calibracion = 0.025            # 0.0025 pixeles por metro a 1 metro de distancia. Factor de correccion
-cam_x_offset    = 0.045        # Correccion de camara por los gripper, 0.04 / -0.015
-cam_y_offset    = -0.02  
+cam_calibracion = 0.0025            # 0.0025 pixeles por metro a 1 metro de distancia. Factor de correccion
+cam_x_offset    = 0.04              # Correccion de camara por los gripper,
+cam_y_offset    = -0.015       
 resolution      = 1
-width           = 1280             # 1280 640  960
-height          = 800               # 800  400  600
+width           = 960               # 1280 640  960
+height          = 600               # 800  400  600
 #The above step is to set the Resolution of the Video. The default is 640x480.
 # This examp8le works with a Resolution of 640x480.
 
@@ -80,10 +80,9 @@ def mensaje_matriz_a_pose(T, frame):
 def pixel_to_baxter(px, dist):
 	
 
-	print "px[0]", px[0]
-	print "px[1]", px[1]
+	print "px[0]", px
 	print "pose_i: ",pose_i
-	x = ((px[0]  - (height / 2)) * cam_calibracion * dist)\
+	x = ((px[0] - (height / 2)) * cam_calibracion * dist)\
 	    + pose_i[0] + cam_x_offset
 
 	y = ((px[1] - (width / 2)) * cam_calibracion * dist)\
@@ -93,7 +92,7 @@ def pixel_to_baxter(px, dist):
 	return (x, y)
 
 def mover_baxter(source_frame, trans, rot):
-	nombre_servicio = '/ExternalTools/'+ 'left' +'/PositionKinematicsNode/IKService'
+	nombre_servicio = '/ExternalTools/'+ 'right' +'/PositionKinematicsNode/IKService'
 	servicio_ik = rospy.ServiceProxy(nombre_servicio,SolvePositionIK)
 	frame = source_frame   
 
@@ -134,27 +133,27 @@ def transformacion(frame):
 	gray = cv2.medianBlur(gray,5) #reduce el ruido de sal
 	gray = cv2.erode(gray,kernel,iterations = 1)#erosiona la imagen
 	gray = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,3.5)
-	#cv2.imshow("GR",gray)
+	
 	#detectar circulos en la imagen
-	circles =cv2.HoughCircles(gray,cv.CV_HOUGH_GRADIENT,1, 200, param1=50, param2=65,minRadius=20, maxRadius=160)
-	#circles = cv2.HoughCircles(gray, cv.CV_HOUGH_GRADIENT, 1, 200, param1=40, param2=45, minRadius=20, maxRadius=140)
+	circles = cv2.HoughCircles(gray, cv.CV_HOUGH_GRADIENT, 1, 200, param1=40, param2=45, minRadius=20, maxRadius=140)
 	return circles 
 
 def dibujarcirculo(circles,frame):
 	print "circles" , circles
 	if circles is not None:
-
 		# convert the (x, y) coordinates and radius of the circles to integers
+        
 		circles = np.round(circles[0, :]).astype("int")
-		
-		# loop over the (x, y) coordinayates and radius of the circles
+		#print circles[0][0]
+		#print circles[0][1]
+		# loop over the (x, y) coordinates and radius of the circles
 		for (x, y, r) in circles:	
 			cv2.circle(frame, (x, y), r, (0, 255, 0), 4) #dibujar circulo periferico
 			cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1) #dibujar rectangulo en el centro
 			
 
 #right_camera_callback(data)
-rospy.Subscriber('/cameras/left_hand_camera/image', Image, callback)
+rospy.Subscriber('/cameras/right_hand_camera/image', Image, callback)
 
 #while not rospy.is_shutdown():
 QtoE()
@@ -166,85 +165,70 @@ while not rospy.is_shutdown():	# Capture frame-by-frame
 		continue
 	frame=foto
 	circles=transformacion(frame)
-	dibujarcirculo(circles,frame)
-	#copia_cir=circles
-	#print type(copia_cir)
+	frame1=dibujarcirculo(circles,frame)
+	copia_cir=circles
+	print type(copia_cir)
 
-	#print "Circulos", len(circles)
-	#rospy.sleep(2)
+	print "Circulos", len(circles)
+	rospy.sleep(2)
 	circles=np.round(circles[0,:].astype("int"))
 	
-	#cv2.imwrite("Frame.jpg",frame)
+	cv2.imwrite("Frame.jpg",frame1)
 	cv2.imshow("Frame",frame)
 	cv2.waitKey(0)
 	#send_image("Frame.jpg")
 	#acercarse a la torre
-	t=0.16
-	#circles1= []
-	#print type(circles1) 
+	t=0.15
+	circles1= []
+	print type(circles1) 
 	
 	print "Dimension: ", circles.ndim
-	#for i in range(circles.ndim):
-	#	circles1.append(circles[i])
-	#print circles1
-	#x1=0.61195328392783256
-	#y1=-0.6652463368344972
-	#deposito2=[x=0.31195328392783256, y=0.6652463368344972]
-	circles1=list(circles)
-	circles1.sort
-	print "circles1",circles1
+	for i in range(circles.ndim):
+		circles1.append(circles[i])
+	print circles1
 	print "Tamaño Circle1: ",len(circles1)
-	e=0.02
+	print "primero: " ,circles1[0][1]
 	tamano=len(circles1)
-
 	y=0.05
+	k=0;
+	xdep=-0.3
+	ydep=0.4
 	while circles1:
 		
 		punto=circles1.pop()
-		
+
 		print "tamaño while: ",len(circles1)
 		print "punto: ", punto[0],punto[1]
-		pun=pixel_to_baxter((punto[0], punto[1] ),0.0)
+		pun=pixel_to_baxter((punto[0], punto[1]),0.27)
 		
-		print punto[2]
+		print pun[0]
 		#(puntox,puntoy)=pixel_to_baxter(punto,0.3)
 		#print "puntox: ",puntox ,"puntoy: ",puntoy
 		rospy.sleep(0.5)
 		mover_baxter('base',[pun[0],pun[1],0.0],[math.pi,0,0])
 		#pose_i = [pun[0]-0.05, pun[1]+0.05, zz, roll, pitch, yaw]
 		#pose = [pun[0]-0.05, pun[1]+0.05, zz, roll, pitch, yaw]
-		mover_baxter('base',[pun[0],pun[1],-0.17],[math.pi,0,0])
+		mover_baxter('base',[pun[0],pun[1],-0.16],[math.pi,0,0])
 		rospy.sleep(0.2)
 		gripper.close()
+		rospy.sleep(1)
+		desfase=random.uniform(0,0.1)
+		mover_baxter('base',[pun[0],pun[1],0.0],[math.pi,0,0])
+		rospy.sleep(1)
+		mover_baxter('base',[desfase+xdep,ydep,0.0],[math.pi,0,0])
+		rospy.sleep(1)
+		mover_baxter('base',[desfase+xdep,ydep,-t],[math.pi,0,0])
 		rospy.sleep(0.5)
-		
-		if gripper.force()==0:
-			print 'no hay nada en el gripper'
-			gripper.open()	
-			mover_baxter('base',[pun[0],pun[1],0.0],[math.pi,0,0])
-			
-			break
-			
-		else:
-			rospy.sleep(0.3)
-			mover_baxter('base',[pun[0],pun[1],0.0],[math.pi,0,0])
-			rospy.sleep(1)
-			mover_baxter('base',[0.47,0.1,0.0],[math.pi,0,0])
-			rospy.sleep(1)
-			mover_baxter('base',[0.47,0.1,-t],[math.pi,0,0])
-			rospy.sleep(0.5)
-			gripper.open()
-			rospy.sleep(0.5)
-			mover_baxter('base',[0.47,0.1,t],[math.pi,0,0])
-			rospy.sleep(0.5)
-			mover_baxter('base',[pun[0],pun[1],0.0],[math.pi,0,0])
+		gripper.open()
+		rospy.sleep(0.5)
+		mover_baxter('base',[desfase+xdep,desfase+ydep,0.0],[math.pi,0,0])
+		rospy.sleep(0.5)
+		#mover_baxter('base',[pun1[0]+0.4,pun1[1],t],[math.pi,0,0])
 		#mover_baxter('base',[0.4,-0.3,t],[math.pi,0,0])
 		#pose_i = [pun[0], pun[1], z, roll, pitch, yaw]
 		#pose = [pun[0], pun[1], z, roll, pitch, yaw]
-			print "pase por aca"
-			t=t-0.03
-
-			
-			
+		t=t-0.03
+		y=y*-1
+		tamano=len(circles1)
 	#pose_i = [pun[0], pun[1], zz, roll, pitch, yaw]
 	#pose = [pun[0], pun[1], zz, roll, pitch, yaw]

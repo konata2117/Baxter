@@ -7,4 +7,11 @@
 # new environment variables
 
 # modified environment variables
+export CMAKE_PREFIX_PATH="/home/natalia/ros_baxter/devel:$CMAKE_PREFIX_PATH"
+export CPATH="/home/natalia/ros_baxter/devel/include:$CPATH"
+export LD_LIBRARY_PATH="/home/natalia/ros_baxter/devel/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="/home/natalia/ros_baxter/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PWD="/home/natalia/ros_baxter/build"
+export PYTHONPATH="/home/natalia/ros_baxter/devel/lib/python2.7/dist-packages:$PYTHONPATH"
+export ROSLISP_PACKAGE_DIRECTORIES="/home/natalia/ros_baxter/devel/share/common-lisp"
+export ROS_PACKAGE_PATH="/home/natalia/ros_baxter/src:$ROS_PACKAGE_PATH"

@@ -24,7 +24,7 @@ baxter_hostname="011607P0031.local"
 #baxter_hostname="192.168.0.54"
 # Set *Either* your computers ip address or hostname. Please note if using
 # your_hostname that this must be resolvable to Baxter.
-your_ip="192.168.0.9"
+your_ip="192.168.100.7"
 #your_ip="192.168.42.192"
 #your_hostname="my_computer.local"
 
